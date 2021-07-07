@@ -1,7 +1,12 @@
 import GameEngine as TicTacToe
+import numpy as np
 
 game = TicTacToe.GameEngine()
 player = "X"
+
+test = np.array([.4, .3, .2, .1, .9, .05, .7, .6, .8])
+
+
 
 player_has_won = False
 player_has_updated_board = False
@@ -22,7 +27,8 @@ while not player_has_won:
             if player_has_updated_board == False:
                 print("\nThat is an invalid selection\n")
         else:
-            game.ai_random_move("O")
+            game.update_square("O",game.ai_selection(test))
+            #game.ai_random_move("O")
             print("\n")
             player_has_updated_board = True
 

@@ -51,6 +51,5 @@ class TicTacToe:
                 valid_squares.append(square + 1)
         return valid_squares
 
-
     def get_1d_array_of_board(self):
-        return self.tic_tac_toe_grid.reshape()
+        return self.tic_tac_toe_grid.flatten()
