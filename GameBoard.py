@@ -10,8 +10,8 @@ class TicTacToe:
         self.num_players_tic_tac_toe = num_players
 
     def reset_board(self):
-        self.tic_tac_toe_grid = [['.'] * 3 for i in range(3)]
-        self.turn = "x_turn"
+        self.tic_tac_toe_grid = [ ['.']*3 for i in range(3)]
+        self.tic_tac_toe_grid = np.asarray(self.tic_tac_toe_grid)
 
     def print_grid(self):
         for y in range(3):
