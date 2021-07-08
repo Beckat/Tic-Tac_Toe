@@ -13,7 +13,7 @@ class GameEngine:
     def update_square(self, player_symbol, grid_coordinate):
             if self.game_board.check_valid_input(player_symbol, grid_coordinate):
                 self.game_board.set_grid_square(player_symbol, grid_coordinate)
-                return True
+                return False
             else:
                 return False
 
