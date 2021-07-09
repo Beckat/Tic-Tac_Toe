@@ -1,13 +1,14 @@
 import numpy as np
-
+import gym
 
 class TicTacToe:
 
-    def __init__(self, num_players = 0):
+    def __init__(self, num_players = 1):
         self.tic_tac_toe_grid = [ ['.']*3 for i in range(3)]
         self.tic_tac_toe_grid = np.asarray(self.tic_tac_toe_grid)
         self.turn = "x_turn"
         self.num_players_tic_tac_toe = num_players
+
 
     def reset_board(self):
         self.tic_tac_toe_grid = [ ['.']*3 for i in range(3)]
