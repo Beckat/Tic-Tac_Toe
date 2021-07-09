@@ -6,9 +6,10 @@ import itertools
 import numpy as np
 import random
 import GameEngine as TicTacToe
+import Neural_Network
 
 GAMMA = 0.99
-BATCH_SIZE = 1
+BATCH_SIZE = 10
 BUFFER_SIZE = 500000
 MIN_REPLAY_SIZE = 1000
 EPSILON_START = 0.0
@@ -18,35 +19,6 @@ TARGET_UPDATE_FREQ = 500
 
 
 
-class Network(nn.Module):
-    def __init__(self, env):
-        super().__init__()
-
-        #in_features = int(np.prod(env.observation_space.shape))
-        in_features = 27
-
-        self.net = nn.Sequential(
-            nn.Linear(in_features, 150),
-            nn.Tanh(),
-            nn.Linear(150, env.action_space.n)
-        )
-
-    def forward(self, x):
-        return self.net(x)
-
-    def act(self, obs):
-        obs_t = torch.as_tensor(obs, dtype=torch.float32)
-        q_values = self(obs_t.unsqueeze(0))
-        possible_values = env.list_of_valid_moves()
-
-        for x in range(1, 10):
-            if x not in possible_values:
-                q_values[0][x - 1] = -10.0
-
-        max_q_index = torch.argmax(q_values, dim=1)[0]
-        action = max_q_index.detach().item()
-
-        return action
 
 #env = gym.make(GameEngine)
 env = TicTacToe.GameEngine()
@@ -57,8 +29,10 @@ rew_buffer = deque([0.0], maxlen=100)
 
 episode_reward = 0.0
 
-online_net = Network(env)
-target_net = Network(env)
+online_net = Neural_Network.Network(env)
+online_net.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe"))
+
+target_net = Neural_Network.Network(env)
 
 target_net.load_state_dict(online_net.state_dict())
 
@@ -87,10 +61,8 @@ for step in itertools.count():
     if rnd_sample <= epsilon:
         action = env.action_space.sample()
     else:
-        action = online_net.act(obs)
+        action = online_net.act(obs, env)
         env.update_square('X', action+1)
-        if step > 250000:
-            env.game_board.print_grid()
 
     new_obs, rew, done, info = env.step(action, 'X')
     transition = (obs, action, rew, done, new_obs)
@@ -155,38 +127,8 @@ for step in itertools.count():
         print('Step ', step)
         print('Avg Rew', np.mean(rew_buffer))
         print(env.game_board.print_grid())
-
-'''
-if torch.cuda.is_available():
-    device = torch.device("cuda:0")  # you can continue going on here, like cuda:1 cuda:2....etc.
-    print("Running on the GPU")
-else:
-    device = torch.device("cpu")
-    print("Running on the CPU")
-
-
-class Network(nn.Module):
-
-    def __init__(self):
-        super().__init__()
-
-        # Inputs to hidden layer linear transformation
-        self.hidden = nn.Linear(27, 243)
-        # Output layer, 10 units - one for each digit
-        self.output = nn.Linear(243, 9)
-
-        # Define sigmoid activation and softmax output
-        self.sigmoid = nn.Sigmoid()
-        self.softmax = nn.Softmax(dim=1)
-
-
-    def forward(self, x):
-        # Pass the input tensor through each of our operations
-        x = self.hidden(x)
-        x = self.sigmoid(x)
-        x = self.output(x)
-        x = self.softmax(x)
-
-        return x
-        
-'''
+        #if step < 2000:
+        #    torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe")
+        if step > 70000:
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target")

@@ -48,7 +48,7 @@ class GameEngine(gym.Env):
     def ai_random_move(self, player):
         self.update_square(player, rand.choice(self.game_board.get_valid_squares()))
 
-    def get_ai_state(self):
+    def get_ai_state(self, decorator='X'):
         ai_observation_state = np.full((27), 0)
         counter = 0
         for row in self.game_board.get_grid():
@@ -56,9 +56,14 @@ class GameEngine(gym.Env):
                 if square == '.':
                     ai_observation_state[counter] = 1
                 elif square == 'X':
-                    ai_observation_state[counter + 7] = 1
+                    if decorator == 'X':
+                        ai_observation_state[counter + 9] = 1
+                    else:
+                        ai_observation_state[counter + 18] = 1
+                elif decorator == 'O':
+                    ai_observation_state[counter + 9] = 1
                 else:
-                    ai_observation_state[counter + 14] = 1
+                    ai_observation_state[counter + 18] = 1
                 counter = counter + 1
         return ai_observation_state
 
@@ -93,7 +98,7 @@ class GameEngine(gym.Env):
                 done = True
 
         info = {}
-        state = self.get_ai_state()
+        state = self.get_ai_state(decorator)
 
         return state, reward, done, info
 
