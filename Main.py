@@ -8,6 +8,8 @@ player_has_won = False
 player_has_updated_board = False
 
 player_count = input("How many players (1-2) ")
+
+# Defaults to single player if invalid input is entered
 if not player_count == "1" and not player_count == "2":
     player_count = "1"
 

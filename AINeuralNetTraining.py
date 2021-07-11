@@ -9,15 +9,23 @@ import GameEngine as TicTacToe
 import Neural_Network
 
 GAMMA = 0.99
-BATCH_SIZE = 10
+BATCH_SIZE = 25
 BUFFER_SIZE = 500000
 MIN_REPLAY_SIZE = 1000
 EPSILON_START = 0.0
 EPSILON_END = 0.0
 EPSILON_DECAY = 10000
 TARGET_UPDATE_FREQ = 500
+wins = 0
+losses = 0
+ties = 0
 
-
+if torch.cuda.is_available():
+    device = torch.device("cuda:0")  # you can continue going on here, like cuda:1 cuda:2....etc.
+    print("Running on the GPU")
+else:
+    device = torch.device("cpu")
+    print("Running on the CPU")
 
 
 #env = gym.make(GameEngine)
@@ -29,14 +37,19 @@ rew_buffer = deque([0.0], maxlen=100)
 
 episode_reward = 0.0
 
-online_net = Neural_Network.Network(env)
-online_net.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe"))
+online_net = Neural_Network.Network(env, 1)
+#online_net.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe"))
 
-target_net = Neural_Network.Network(env)
+target_net = Neural_Network.Network(env, 1)
+online_net.to(device)
+target_net.to(device)
 
 target_net.load_state_dict(online_net.state_dict())
 
-optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-3)
+
+optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-3,)
+
+print(online_net)
 
 #initalize replay buffer
 obs = env.reset()
@@ -61,10 +74,16 @@ for step in itertools.count():
     if rnd_sample <= epsilon:
         action = env.action_space.sample()
     else:
-        action = online_net.act(obs, env)
+        action = online_net.act(obs, env, device)
         env.update_square('X', action+1)
 
     new_obs, rew, done, info = env.step(action, 'X')
+    if next(iter(info)) == "Win":
+        wins = wins + 1
+    if next(iter(info)) == "Lose":
+        losses = losses + 1
+    if next(iter(info)) == "Tie":
+        ties = ties + 1
     transition = (obs, action, rew, done, new_obs)
     replay_buffer.append(transition)
 
@@ -93,7 +112,7 @@ for step in itertools.count():
     new_obses_t = torch.as_tensor(new_obses, dtype=torch.float32)
 
     # Compute Targets
-    target_q_values = target_net(new_obses_t)
+    target_q_values = target_net(new_obses_t.cuda())
     possible_values = env.list_of_valid_moves()
 
     '''for x in range(1, 10):
@@ -103,14 +122,14 @@ for step in itertools.count():
 
     max_target_q_values = target_q_values.max(dim=1, keepdim=True)[0]
 
-    targets = rews_t + GAMMA * (1 - dones_t) * max_target_q_values
+    targets = rews_t + GAMMA * (1 - dones_t) * max_target_q_values.cpu()
 
     #Compute Loss
-    q_values = online_net(obses_t)
+    q_values = online_net(obses_t.cuda())
 
-    action_q_values = torch.gather(input=q_values, dim=1, index=actions_t)
+    action_q_values = torch.gather(input=q_values, dim=1, index=actions_t.cuda()).cuda()
 
-    loss = nn.functional.smooth_l1_loss(action_q_values, targets)
+    loss = nn.functional.smooth_l1_loss(action_q_values.cuda(), targets.cuda()).cuda()
 
     # Actual Gradiant Descent
     optimizer.zero_grad()
@@ -126,9 +145,15 @@ for step in itertools.count():
         print()
         print('Step ', step)
         print('Avg Rew', np.mean(rew_buffer))
+        print("Winds ", wins)
+        print("Loses ", losses)
+        print("Ties ", ties)
+        wins = 0
+        losses = 0
+        ties = 0
         print(env.game_board.print_grid())
-        #if step < 2000:
+          #if step < 2000:
         #    torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe")
         if step > 70000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe")
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_1")
+            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_1")

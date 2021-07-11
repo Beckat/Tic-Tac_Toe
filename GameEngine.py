@@ -76,28 +76,36 @@ class GameEngine(gym.Env):
 
     def step(self, action, decorator):
         done = False
+        finish_state = ""
 
         reward = .01
 
         if self.is_winner(decorator):
             reward = 1
             done = True
+            finish_state = "Win"
         elif self.list_of_valid_moves() == []:
             done = True
             if reward == .01:
                 reward = .25
+                finish_state = "Tie"
         elif decorator == 'X':
-            self.ai_random_move('O')
+            if self.game_board.check_valid_input('O', 5):
+                self.update_square('O', 5)
+            else:
+                self.ai_random_move('O')
             if self.is_winner('O'):
                 reward = -1
                 done = True
+                finish_state = "Lose"
         else:
             self.ai_random_move('X')
             if self.is_winner('X'):
                 reward = -1
                 done = True
+                finish_state = "Lose"
 
-        info = {}
+        info = {finish_state}
         state = self.get_ai_state(decorator)
 
         return state, reward, done, info
