@@ -3,6 +3,9 @@ import torch
 
 
 class Network(nn.Module):
+    """
+
+    """
     def __init__(self, env, hidden_size=243):
         super().__init__()
 
@@ -16,9 +19,21 @@ class Network(nn.Module):
         )
 
     def forward(self, x):
+        """
+
+        :param x:
+        :return:
+        """
         return self.net(x)
 
     def act(self, obs, env, device):
+        """
+
+        :param obs:
+        :param env:
+        :param device:
+        :return:
+        """
         obs_t = torch.as_tensor(obs, dtype=torch.float32, device=device)
         q_values = self(obs_t.unsqueeze(0))
         possible_values = env.list_of_valid_moves()
