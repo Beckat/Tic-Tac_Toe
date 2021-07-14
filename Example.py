@@ -98,15 +98,6 @@ for x in range(1, 10):
             break
 
 
-print("1 Wins Going First vs 125: ", test_1_hidden_size_wins_going_first)
-print("125 Wins Going Second: ", test_125_hidden_size_wins_going_second)
-print("Ties 1 Going First vs 125: ", ties_1_going_first)
-
-
-print("1 Wins Going Second: ", test_1_hidden_size_wins_going_second)
-print("125 Wins Goind First: ", test_125_hidden_size_wins_going_first)
-print("Ties 125 Going First: ", ties_125_going_first)
-
 ties_1_going_first_round_2 = 0
 test_1_hidden_size_wins_going_first_round_2 = 0
 test_1_hidden_size_wins_going_second_round_2 = 0
