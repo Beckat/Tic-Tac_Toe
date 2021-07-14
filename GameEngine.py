@@ -139,7 +139,8 @@ class GameEngine(gym.Env):
                 reward = .25
                 finish_state = "Tie"
         elif decorator == 'X':
-            if self.game_board.check_valid_input('O', 5):
+            random_num = rand.randint(0, 1)
+            if self.game_board.check_valid_input('O', 5) and random_num == 0:
                 self.update_square('O', 5)
             else:
                 self.ai_random_move('O')

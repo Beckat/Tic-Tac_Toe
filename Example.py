@@ -16,7 +16,7 @@ test_125_hidden_size = Neural_Network.Network(env, 125)
 test_50_hidden_size = Neural_Network.Network(env, 50)
 test_1_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_1"))
 test_125_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_125"))
-test_50_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_50"))
+test_50_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_50_expanded"))
 test_1_hidden_size.to(device)
 test_125_hidden_size.to(device)
 test_50_hidden_size.to(device)
@@ -234,29 +234,33 @@ print("1 Wins Going First vs 125: ", test_1_hidden_size_wins_going_first)
 print("125 Wins Going Second: ", test_125_hidden_size_wins_going_second)
 print("Ties 1 Going First vs 125: ", ties_1_going_first)
 
+print("")
 
 print("1 Wins Going Second vs 125: ", test_1_hidden_size_wins_going_second)
 print("125 Wins Going First: ", test_125_hidden_size_wins_going_first)
 print("Ties 125 Going First: ", ties_125_going_first)
 
 print("")
+print("")
 
 print("1 Wins Going First vs 50: ", test_1_hidden_size_wins_going_first_round_2)
 print("50 Wins Going Second: ", test_50_hidden_size_wins_going_second)
 print("Ties 50 Going First: ", ties_1_going_first_round_2)
 
+print("")
 
 print("1 Wins Going Second: vs 50: ", test_1_hidden_size_wins_going_second_round_2)
 print("50 Wins Going First: ", test_50_hidden_size_wins_going_first)
 print("Ties 50 Going First: ", ties_50_going_first)
 
-
+print("")
 print("")
 
 print("125 Wins Going First vs 50: ", test_125_hidden_size_wins_going_first_round_2)
 print("50 Wins Going Second Round 2: ", test_50_hidden_size_wins_going_second_round_2)
 print("Ties 125 Going First Round 2: ", ties_125_going_first_round_2)
 
+print("")
 
 print("125 Wins Going Second: vs 50: ", test_125_hidden_size_wins_going_second_round_2)
 print("50 Wins Going First: Round 2 ", test_50_hidden_size_wins_going_first_round_2)
