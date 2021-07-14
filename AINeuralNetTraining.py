@@ -37,9 +37,9 @@ rew_buffer = deque([0.0], maxlen=100)
 
 episode_reward = 0.0
 
-online_net = Neural_Network.Network(env, 50)
+online_net = Neural_Network.Network(env, 125)
 
-target_net = Neural_Network.Network(env, 50)
+target_net = Neural_Network.Network(env, 125)
 online_net.to(device)
 target_net.to(device)
 
@@ -152,7 +152,7 @@ for step in itertools.count():
         ties = 0
         print(env.game_board.print_grid())
         if step < 2000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_50")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_125")
         if step > 10000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_50")
-            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_50")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_125")
+            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_125")

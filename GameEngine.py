@@ -127,7 +127,7 @@ class GameEngine(gym.Env):
         done = False
         finish_state = ""
 
-        reward = .01
+        reward = 0
 
         if self.is_winner(decorator):
             reward = 1
@@ -135,7 +135,7 @@ class GameEngine(gym.Env):
             finish_state = "Win"
         elif self.list_of_valid_moves() == []:
             done = True
-            if reward == .01:
+            if reward == 0:
                 reward = .25
                 finish_state = "Tie"
         elif decorator == 'X':
