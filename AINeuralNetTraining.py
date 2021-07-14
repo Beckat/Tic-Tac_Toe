@@ -37,17 +37,16 @@ rew_buffer = deque([0.0], maxlen=100)
 
 episode_reward = 0.0
 
-online_net = Neural_Network.Network(env, 1)
-#online_net.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe"))
+online_net = Neural_Network.Network(env, 50)
 
-target_net = Neural_Network.Network(env, 1)
+target_net = Neural_Network.Network(env, 50)
 online_net.to(device)
 target_net.to(device)
 
 target_net.load_state_dict(online_net.state_dict())
 
 
-optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-3,)
+optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-5,)
 
 print(online_net)
 
@@ -112,7 +111,7 @@ for step in itertools.count():
     new_obses_t = torch.as_tensor(new_obses, dtype=torch.float32)
 
     # Compute Targets
-    target_q_values = target_net(new_obses_t.cuda())
+    target_q_values = target_net(new_obses_t.to(device))
     possible_values = env.list_of_valid_moves()
 
     '''for x in range(1, 10):
@@ -125,11 +124,11 @@ for step in itertools.count():
     targets = rews_t + GAMMA * (1 - dones_t) * max_target_q_values.cpu()
 
     #Compute Loss
-    q_values = online_net(obses_t.cuda())
+    q_values = online_net(obses_t.to(device))
 
-    action_q_values = torch.gather(input=q_values, dim=1, index=actions_t.cuda()).cuda()
+    action_q_values = torch.gather(input=q_values, dim=1, index=actions_t.to(device)).to(device)
 
-    loss = nn.functional.smooth_l1_loss(action_q_values.cuda(), targets.cuda()).cuda()
+    loss = nn.functional.smooth_l1_loss(action_q_values.to(device), targets.to(device)).to(device)
 
     # Actual Gradiant Descent
     optimizer.zero_grad()
@@ -152,8 +151,8 @@ for step in itertools.count():
         losses = 0
         ties = 0
         print(env.game_board.print_grid())
-          #if step < 2000:
-        #    torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe")
-        if step > 70000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_1")
-            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_1")
+        if step < 2000:
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_50")
+        if step > 10000:
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_50")
+            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_50")
