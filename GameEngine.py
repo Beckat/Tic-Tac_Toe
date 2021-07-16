@@ -116,7 +116,7 @@ class GameEngine(gym.Env):
                 valid_moves.append(x)
         return valid_moves
 
-    def step(self, action, decorator,ai_move=-1):
+    def step(self, action, decorator,action_second_entity=-1):
         """
         Updates the rewards values, game state, if the game is complete and if the AI won, lost, or tied
         :param action: Placeholder
@@ -131,36 +131,41 @@ class GameEngine(gym.Env):
         else:
             ai_decorator = "X"
 
-        reward = 0
+        reward = [0, 0]
+        state = [self.get_ai_state(decorator), self.get_ai_state(ai_decorator)]
 
         if self.is_winner(decorator):
-            reward = 1
+            reward[0] = 1
+            reward[1] = -1
             done = True
             finish_state = "Win"
         elif self.list_of_valid_moves() == []:
             done = True
             if reward == 0:
-                reward = .25
+                reward[0] = .25
+                reward[1] = .25
                 finish_state = "Tie"
         else:
             random_num = rand.randint(0, 3)
-            if ai_move == -1:
+            if action_second_entity == -1:
                 if self.game_board.check_valid_input(ai_decorator, 5) and random_num == 0:
                     self.update_square(ai_decorator, 5)
                 else:
                     self.ai_random_move(ai_decorator)
             elif random_num > 0:
-                self.update_square(ai_decorator, ai_move)
+                self.update_square(ai_decorator, action_second_entity)
             else:
                 self.ai_random_move(ai_decorator)
 
             if self.is_winner(ai_decorator):
-                reward = -1
+                reward[0] = -1
+                reward[1] = 1
                 done = True
                 finish_state = "Lose"
 
         info = {finish_state}
-        state = self.get_ai_state(decorator)
+        state[0] = self.get_ai_state(decorator)
+        state[1] = self.get_ai_state(ai_decorator)
 
         return state, reward, done, info
 
