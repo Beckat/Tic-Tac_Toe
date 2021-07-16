@@ -6,17 +6,26 @@ class Network(nn.Module):
     """
 
     """
-    def __init__(self, env, hidden_size=243):
+    def __init__(self, env, hidden_size=243, hidden_size_2=0):
         super().__init__()
 
         #in_features = int(np.prod(env.observation_space.shape))
         in_features = 27
 
-        self.net = nn.Sequential(
-            nn.Linear(in_features, hidden_size),
-            nn.Tanh(),
-            nn.Linear(hidden_size, env.action_space.n)
-        )
+        if hidden_size_2 == 0:
+            self.net = nn.Sequential(
+                nn.Linear(in_features, hidden_size),
+                nn.Tanh(),
+                nn.Linear(hidden_size, env.action_space.n)
+            )
+        else:
+            self.net = nn.Sequential(
+                nn.Linear(in_features, hidden_size),
+                nn.Tanh(),
+                nn.Linear(hidden_size, hidden_size_2),
+                nn.Tanh(),
+                nn.Linear(hidden_size_2, env.action_space.n)
+            )
 
     def forward(self, x):
         """

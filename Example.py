@@ -12,10 +12,10 @@ else:
 env = TicTacToe.GameEngine()
 
 test_1_hidden_size = Neural_Network.Network(env, 1)
-test_125_hidden_size = Neural_Network.Network(env, 125)
+test_125_hidden_size = Neural_Network.Network(env, 144, 112)
 test_50_hidden_size = Neural_Network.Network(env, 50)
 test_1_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_1"))
-test_125_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_125"))
+test_125_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_target_tic_tac_toe_two_layers_v2"))
 test_50_hidden_size.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_50_expanded"))
 test_1_hidden_size.to(device)
 test_125_hidden_size.to(device)

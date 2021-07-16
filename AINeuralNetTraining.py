@@ -32,18 +32,23 @@ else:
 env = TicTacToe.GameEngine()
 
 replay_buffer = deque(maxlen=BUFFER_SIZE)
+opp_replay_buffer = deque(maxlen=BUFFER_SIZE)
 
 rew_buffer = deque([0.0], maxlen=100)
+opp_rew_buffer = deque([0.0], maxlen=100)
 
 episode_reward = 0.0
+opp_episode_reward = 0.0
 
-online_net = Neural_Network.Network(env, 125)
+online_net = Neural_Network.Network(env, 144, 112)
 
-target_net = Neural_Network.Network(env, 125)
+target_net = Neural_Network.Network(env, 144, 112)
 online_net.to(device)
 target_net.to(device)
 
-online_net.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_125"))
+opposition_net = Neural_Network.Network(env, 144, 112)
+opposition_net.load_state_dict(torch.load("/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_target_tic_tac_toe_two_layers"))
+opposition_net.to(device)
 
 target_net.load_state_dict(online_net.state_dict())
 
@@ -77,6 +82,8 @@ for step in itertools.count():
     else:
         action = online_net.act(obs, env, device)
         env.update_square('X', action+1)
+        opposition_obs = env.get_ai_state('O')
+        ai_action = opposition_net.act(opposition_obs, env, device) + 1
 
     new_obs, rew, done, info = env.step(action, 'X')
     if next(iter(info)) == "Win":
@@ -154,7 +161,7 @@ for step in itertools.count():
         ties = 0
         print(env.game_board.print_grid())
         if step < 2000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_125_expanded")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_two_layers_v2")
         if step > 10000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_125_expanded")
-            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_target_125_expanded")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_two_layers_v2")
+            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_target_tic_tac_toe_two_layers_v2")

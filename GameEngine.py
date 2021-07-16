@@ -116,7 +116,7 @@ class GameEngine(gym.Env):
                 valid_moves.append(x)
         return valid_moves
 
-    def step(self, action, decorator):
+    def step(self, action, decorator,ai_move=-1):
         """
         Updates the rewards values, game state, if the game is complete and if the AI won, lost, or tied
         :param action: Placeholder
@@ -126,6 +126,10 @@ class GameEngine(gym.Env):
         """
         done = False
         finish_state = ""
+        if decorator == "X":
+            ai_decorator = "O"
+        else:
+            ai_decorator = "X"
 
         reward = 0
 
@@ -138,19 +142,19 @@ class GameEngine(gym.Env):
             if reward == 0:
                 reward = .25
                 finish_state = "Tie"
-        elif decorator == 'X':
-            random_num = rand.randint(0, 1)
-            if self.game_board.check_valid_input('O', 5) and random_num == 0:
-                self.update_square('O', 5)
-            else:
-                self.ai_random_move('O')
-            if self.is_winner('O'):
-                reward = -1
-                done = True
-                finish_state = "Lose"
         else:
-            self.ai_random_move('X')
-            if self.is_winner('X'):
+            random_num = rand.randint(0, 3)
+            if ai_move == -1:
+                if self.game_board.check_valid_input(ai_decorator, 5) and random_num == 0:
+                    self.update_square(ai_decorator, 5)
+                else:
+                    self.ai_random_move(ai_decorator)
+            elif random_num > 0:
+                self.update_square(ai_decorator, ai_move)
+            else:
+                self.ai_random_move(ai_decorator)
+
+            if self.is_winner(ai_decorator):
                 reward = -1
                 done = True
                 finish_state = "Lose"
