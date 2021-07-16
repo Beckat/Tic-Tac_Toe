@@ -46,8 +46,8 @@ target_net = Neural_Network.Network(env, 72, 56)
 online_net.to(device)
 target_net.to(device)
 
-opp_online_net = Neural_Network.Network(env, 72, 56)
-opp_target_net = Neural_Network.Network(env, 72, 56)
+opp_online_net = Neural_Network.Network(env, 27, 56)
+opp_target_net = Neural_Network.Network(env, 27, 56)
 opp_online_net.to(device)
 opp_target_net.to(device)
 
@@ -55,7 +55,7 @@ target_net.load_state_dict(online_net.state_dict())
 
 
 optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-4,)
-opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-3,)
+opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-6,)
 
 print(online_net)
 
@@ -78,7 +78,13 @@ for __ in range(MIN_REPLAY_SIZE):
 for __ in range(MIN_REPLAY_SIZE):
     action = env.action_space.sample()
     env.update_square("X", action+1)
-    obb_action = action = random.sample(env.list_of_valid_moves(), 1)
+    if len(env.list_of_valid_moves()) == 0:
+        opp_obs = env.reset()
+        action = env.action_space.sample()
+        env.update_square("X", action + 1)
+        done = False
+
+    obb_action = random.sample(env.list_of_valid_moves(), 1)
 
     new_obs, rew, done, info = env.step(action, "X", obb_action)
     opp_rew = rew[1]
@@ -93,6 +99,8 @@ for __ in range(MIN_REPLAY_SIZE):
 # Main training loop
 obs = env.reset()
 opp_obs = env.reset()
+
+opp_transition_holder = []
 
 for step in itertools.count():
     epsilon = np.interp(step, [0, EPSILON_DECAY], [EPSILON_START, EPSILON_END])
@@ -123,7 +131,7 @@ for step in itertools.count():
     transition = (obs, action, rew, done, new_obs)
     opp_transition = (opp_obs, opp_action, opp_rew, done, opp_new_obs)
     replay_buffer.append(transition)
-    opp_replay_buffer.append(opp_transition)
+    opp_transition_holder.append(opp_transition)
 
     opp_obs = opp_new_obs
     obs = new_obs
@@ -131,11 +139,19 @@ for step in itertools.count():
     episode_reward += rew
     opp_episode_reward += opp_rew
     if done:
+        for transition_index in range(len(opp_transition_holder)):
+            opp_transition_holder[transition_index] = list(opp_transition_holder[transition_index])
+            test1 = opp_transition_holder[len(opp_transition_holder) - 1][2]
+            test2 = len(opp_transition_holder) * transition_index + 1
+            test3 = (opp_transition_holder[len(opp_transition_holder) - 1][2] / len(opp_transition_holder))
+            test4 = ((opp_transition_holder[len(opp_transition_holder) - 1][2] / len(opp_transition_holder)) * transition_index + 1)
+            opp_transition_holder[transition_index][2] = ((opp_transition_holder[len(opp_transition_holder) - 1][2] / len(opp_transition_holder)) * (transition_index + 1))
+            opp_replay_buffer.append(opp_transition_holder[transition_index])
+        opp_transition_holder = tuple(opp_transition_holder)
+        opp_transition_holder = []
         obs = env.reset()
         opp_obs = env.reset()
-        rew_buffer.append(episode_reward)
         opp_rew_buffer.append(opp_episode_reward)
-        episode_reward = 0.0
         opp_episode_reward = 0.0
 
 
