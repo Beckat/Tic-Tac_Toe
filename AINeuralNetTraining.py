@@ -55,7 +55,7 @@ target_net.load_state_dict(online_net.state_dict())
 
 
 optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-4,)
-opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-6,)
+opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-3,)
 
 print(online_net)
 
@@ -139,6 +139,8 @@ for step in itertools.count():
     episode_reward += rew
     opp_episode_reward += opp_rew
     if done:
+        rew_buffer.append(episode_reward)
+        episode_reward = 0.0
         for transition_index in range(len(opp_transition_holder)):
             opp_transition_holder[transition_index] = list(opp_transition_holder[transition_index])
             test1 = opp_transition_holder[len(opp_transition_holder) - 1][2]
@@ -151,8 +153,10 @@ for step in itertools.count():
         opp_transition_holder = []
         obs = env.reset()
         opp_obs = env.reset()
+
         opp_rew_buffer.append(opp_episode_reward)
         opp_episode_reward = 0.0
+
 
 
     #Start Gradient Step
@@ -255,8 +259,6 @@ for step in itertools.count():
         losses = 0
         ties = 0
         print(env.game_board.print_grid())
-        if step %5000 == 0:
-            print(opp_online_net.state_dict())
         if step < 2000:
             torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_two_layers_v2")
             torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_initial_tic_tac_toe_two_layers_v2")
