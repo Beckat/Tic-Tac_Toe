@@ -40,22 +40,22 @@ opp_rew_buffer = deque([0.0], maxlen=100)
 episode_reward = 0.0
 opp_episode_reward = 0.0
 
-online_net = Neural_Network.Network(env, 144, 112)
+online_net = Neural_Network.Network(env, 72, 56)
 
-target_net = Neural_Network.Network(env, 144, 112)
+target_net = Neural_Network.Network(env, 72, 56)
 online_net.to(device)
 target_net.to(device)
 
-opp_online_net = Neural_Network.Network(env, 144, 112)
-opp_target_net = Neural_Network.Network(env, 144, 112)
+opp_online_net = Neural_Network.Network(env, 72, 56)
+opp_target_net = Neural_Network.Network(env, 72, 56)
 opp_online_net.to(device)
 opp_target_net.to(device)
 
 target_net.load_state_dict(online_net.state_dict())
 
 
-optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-6,)
-opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-6,)
+optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-4,)
+opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-3,)
 
 print(online_net)
 
@@ -66,19 +66,29 @@ for __ in range(MIN_REPLAY_SIZE):
     action = env.action_space.sample()
 
     new_obs, rew, done, info = env.step(action, "X")
-    opp_rew = rew[1]
     rew = rew[0]
-    opp_new_obs = new_obs[1]
     new_obs = new_obs[0]
     transition = (obs, action, rew, done, new_obs)
-    opp_transition = (opp_obs, action, opp_rew, done, opp_new_obs)
     replay_buffer.append(transition)
-    opp_replay_buffer.append(opp_transition)
 
     obs = new_obs
-    opp_obs = opp_new_obs
     if done:
         obs = env.reset()
+
+for __ in range(MIN_REPLAY_SIZE):
+    action = env.action_space.sample()
+    env.update_square("X", action+1)
+    obb_action = action = random.sample(env.list_of_valid_moves(), 1)
+
+    new_obs, rew, done, info = env.step(action, "X", obb_action)
+    opp_rew = rew[1]
+    opp_new_obs = new_obs[1]
+    opp_transition = (opp_obs, obb_action[0], opp_rew, done, opp_new_obs)
+    opp_replay_buffer.append(opp_transition)
+
+    opp_obs = opp_new_obs
+    if done:
+        opp_obs = env.reset()
 
 # Main training loop
 obs = env.reset()
@@ -95,8 +105,10 @@ for step in itertools.count():
         env.update_square('X', action+1)
         opposition_obs = env.get_ai_state('O')
         opp_action = opp_online_net.act(opposition_obs, env, device) + 1
+        #print("OPP Action: ", opp_action)
 
     new_obs, rew, done, info = env.step(action, 'X', opp_action)
+    #print("Reward is: ", rew)
     opp_rew = rew[1]
     rew = rew[0]
     opp_new_obs = new_obs[1]
@@ -227,6 +239,8 @@ for step in itertools.count():
         losses = 0
         ties = 0
         print(env.game_board.print_grid())
+        if step %5000 == 0:
+            print(opp_online_net.state_dict())
         if step < 2000:
             torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_two_layers_v2")
             torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_initial_tic_tac_toe_two_layers_v2")

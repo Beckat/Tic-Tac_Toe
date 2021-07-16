@@ -64,3 +64,15 @@ def test_no_winner(test_game_engine):
     test_game_engine.update_square("O", 5)
     test_game_engine.update_square("X", 9)
     assert  test_game_engine.is_winner("X") is False, "Detecting winning in a mixed line"
+
+def test_full_board(test_game_engine):
+    test_game_engine.update_square("X", 1)
+    test_game_engine.update_square("O", 2)
+    test_game_engine.update_square("O", 3)
+    test_game_engine.update_square("O", 4)
+    test_game_engine.update_square("O", 5)
+    test_game_engine.update_square("O", 6)
+    test_game_engine.update_square("O", 7)
+    test_game_engine.update_square("O", 8)
+    test_game_engine.update_square("X", 9)
+    assert len(test_game_engine.list_of_valid_moves()) == 0, "Full board has valid moves"

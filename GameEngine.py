@@ -139,12 +139,13 @@ class GameEngine(gym.Env):
             reward[1] = -1
             done = True
             finish_state = "Win"
-        elif self.list_of_valid_moves() == []:
+        elif len(self.list_of_valid_moves()) == 0:
             done = True
             if reward == 0:
                 reward[0] = .25
                 reward[1] = .25
                 finish_state = "Tie"
+                #self.game_board.print_grid()
         else:
             random_num = rand.randint(0, 3)
             if action_second_entity == -1:
@@ -160,6 +161,7 @@ class GameEngine(gym.Env):
                 reward[1] = 1
                 done = True
                 finish_state = "Lose"
+                #self.game_board.print_grid()
 
         info = {finish_state}
         state[0] = self.get_ai_state(decorator)
