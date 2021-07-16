@@ -55,7 +55,7 @@ target_net.load_state_dict(online_net.state_dict())
 
 
 optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-6,)
-opp_optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-6,)
+opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-6,)
 
 print(online_net)
 
@@ -68,12 +68,15 @@ for __ in range(MIN_REPLAY_SIZE):
     new_obs, rew, done, info = env.step(action, "X")
     opp_rew = rew[1]
     rew = rew[0]
+    opp_new_obs = new_obs[1]
+    new_obs = new_obs[0]
     transition = (obs, action, rew, done, new_obs)
-    opp_transition = (opp_obs, action, opp_rew, done, new_obs)
+    opp_transition = (opp_obs, action, opp_rew, done, opp_new_obs)
     replay_buffer.append(transition)
+    opp_replay_buffer.append(opp_transition)
 
-    obs = new_obs[0]
-    opp_obs = new_obs[1]
+    obs = new_obs
+    opp_obs = opp_new_obs
     if done:
         obs = env.reset()
 
@@ -190,11 +193,6 @@ for step in itertools.count():
     opp_target_q_values = opp_target_net(opp_new_obses_t.to(device))
     opp_possible_values = env.list_of_valid_moves()
 
-    '''for x in range(1, 10):
-        if x not in possible_values:
-            target_q_values[0][x-1] = -10.0
-    '''
-
     opp_max_target_q_values = opp_target_q_values.max(dim=1, keepdim=True)[0]
 
     opp_targets = opp_rews_t + GAMMA * (1 - opp_dones_t) * opp_max_target_q_values.cpu()
@@ -222,7 +220,7 @@ for step in itertools.count():
         print()
         print('Step ', step)
         print('Avg Rew', np.mean(rew_buffer))
-        print("Winds ", wins)
+        print("Wins ", wins)
         print("Loses ", losses)
         print("Ties ", ties)
         wins = 0

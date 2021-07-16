@@ -152,10 +152,8 @@ class GameEngine(gym.Env):
                     self.update_square(ai_decorator, 5)
                 else:
                     self.ai_random_move(ai_decorator)
-            elif random_num > 0:
-                self.update_square(ai_decorator, action_second_entity)
             else:
-                self.ai_random_move(ai_decorator)
+                self.update_square(ai_decorator, action_second_entity)
 
             if self.is_winner(ai_decorator):
                 reward[0] = -1
