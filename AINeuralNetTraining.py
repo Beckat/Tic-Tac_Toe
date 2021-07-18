@@ -8,6 +8,16 @@ import random
 import GameEngine as TicTacToe
 import Neural_Network
 
+
+def update_replay_buffer(transition_holder,  replay_buffer):
+    for transition_index in range(len(transition_holder)):
+        transition_holder[transition_index] = list(transition_holder[transition_index])
+        transition_holder[transition_index][2] = (
+                    (transition_holder[len(transition_holder) - 1][2] / len(transition_holder)) * (
+                        transition_index + 1))
+        replay_buffer.append(transition_holder[transition_index])
+
+
 GAMMA = 0.99
 BATCH_SIZE = 25
 BUFFER_SIZE = 500000
@@ -19,6 +29,8 @@ TARGET_UPDATE_FREQ = 500
 wins = 0
 losses = 0
 ties = 0
+transition_holder = []
+opp_transition_holder = []
 
 if torch.cuda.is_available():
     device = torch.device("cuda:0")  # you can continue going on here, like cuda:1 cuda:2....etc.
@@ -40,14 +52,14 @@ opp_rew_buffer = deque([0.0], maxlen=100)
 episode_reward = 0.0
 opp_episode_reward = 0.0
 
-online_net = Neural_Network.Network(env, 72, 56)
+online_net = Neural_Network.Network(env, 9, 135)
 
-target_net = Neural_Network.Network(env, 72, 56)
+target_net = Neural_Network.Network(env, 9, 135)
 online_net.to(device)
 target_net.to(device)
 
-opp_online_net = Neural_Network.Network(env, 27, 56)
-opp_target_net = Neural_Network.Network(env, 27, 56)
+opp_online_net = Neural_Network.Network(env, 9, 135)
+opp_target_net = Neural_Network.Network(env, 9, 135)
 opp_online_net.to(device)
 opp_target_net.to(device)
 
@@ -69,11 +81,19 @@ for __ in range(MIN_REPLAY_SIZE):
     rew = rew[0]
     new_obs = new_obs[0]
     transition = (obs, action, rew, done, new_obs)
-    replay_buffer.append(transition)
+    transition_holder.append(transition)
 
     obs = new_obs
     if done:
+        update_replay_buffer(transition_holder, replay_buffer)
+        transition_holder = []
         obs = env.reset()
+
+if len(replay_buffer) < MIN_REPLAY_SIZE:
+    update_replay_buffer(transition_holder, replay_buffer)
+    transition_holder = []
+
+opp_obs = env.reset()
 
 for __ in range(MIN_REPLAY_SIZE):
     action = env.action_space.sample()
@@ -90,17 +110,21 @@ for __ in range(MIN_REPLAY_SIZE):
     opp_rew = rew[1]
     opp_new_obs = new_obs[1]
     opp_transition = (opp_obs, obb_action[0], opp_rew, done, opp_new_obs)
-    opp_replay_buffer.append(opp_transition)
+    opp_transition_holder.append(opp_transition)
 
     opp_obs = opp_new_obs
     if done:
+        update_replay_buffer(opp_transition_holder, opp_replay_buffer)
+        opp_transition_holder = []
         opp_obs = env.reset()
+
+if len(opp_replay_buffer) < MIN_REPLAY_SIZE:
+    update_replay_buffer(opp_transition_holder, opp_replay_buffer)
+    opp_transition_holder = []
 
 # Main training loop
 obs = env.reset()
 opp_obs = env.reset()
-
-opp_transition_holder = []
 
 for step in itertools.count():
     epsilon = np.interp(step, [0, EPSILON_DECAY], [EPSILON_START, EPSILON_END])
@@ -130,7 +154,8 @@ for step in itertools.count():
         ties = ties + 1
     transition = (obs, action, rew, done, new_obs)
     opp_transition = (opp_obs, opp_action, opp_rew, done, opp_new_obs)
-    replay_buffer.append(transition)
+    #replay_buffer.append(transition)
+    transition_holder.append(transition)
     opp_transition_holder.append(opp_transition)
 
     opp_obs = opp_new_obs
@@ -139,25 +164,16 @@ for step in itertools.count():
     episode_reward += rew
     opp_episode_reward += opp_rew
     if done:
+        update_replay_buffer(transition_holder, replay_buffer)
+        update_replay_buffer(opp_transition_holder, opp_replay_buffer)
         rew_buffer.append(episode_reward)
-        episode_reward = 0.0
-        for transition_index in range(len(opp_transition_holder)):
-            opp_transition_holder[transition_index] = list(opp_transition_holder[transition_index])
-            test1 = opp_transition_holder[len(opp_transition_holder) - 1][2]
-            test2 = len(opp_transition_holder) * transition_index + 1
-            test3 = (opp_transition_holder[len(opp_transition_holder) - 1][2] / len(opp_transition_holder))
-            test4 = ((opp_transition_holder[len(opp_transition_holder) - 1][2] / len(opp_transition_holder)) * transition_index + 1)
-            opp_transition_holder[transition_index][2] = ((opp_transition_holder[len(opp_transition_holder) - 1][2] / len(opp_transition_holder)) * (transition_index + 1))
-            opp_replay_buffer.append(opp_transition_holder[transition_index])
-        opp_transition_holder = tuple(opp_transition_holder)
-        opp_transition_holder = []
+        opp_rew_buffer.append(opp_episode_reward)
         obs = env.reset()
         opp_obs = env.reset()
-
-        opp_rew_buffer.append(opp_episode_reward)
+        episode_reward = 0.0
         opp_episode_reward = 0.0
-
-
+        transition_holder = []
+        opp_transition_holder = []
 
     #Start Gradient Step
     transitions = random.sample(replay_buffer, BATCH_SIZE)
@@ -260,10 +276,10 @@ for step in itertools.count():
         ties = 0
         print(env.game_board.print_grid())
         if step < 2000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_two_layers_v2")
-            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_initial_tic_tac_toe_two_layers_v2")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_50_v3")
+            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_initial_tic_tac_toe_50_v3")
         if step > 10000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_two_layers_v2")
-            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_target_tic_tac_toe_two_layers_v2")
-            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_tic_tac_toe_two_layers_v2")
-            torch.save(opp_target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_target_tic_tac_toe_two_layers_v2")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_50_v3")
+            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_tic_tac_toe_50_v3")
+            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_target_tic_tac_toe_50_v3")
+            torch.save(opp_target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_target_tic_tac_toe_50_v3")
