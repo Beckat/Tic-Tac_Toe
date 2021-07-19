@@ -6,7 +6,7 @@ import torch
 game = TicTacToe.GameEngine()
 player = "."
 
-player_has_won = False
+game_is_over = False
 player_has_updated_board = False
 player_count = 0
 player_turn = True
@@ -22,13 +22,15 @@ while not player_count == "1" and not player_count == "2":
 if player_count == "1":
     while not player == "X" and not player == "O":
         player = input("Which piece would you like to play (X-O) ")
+else:
+    player = "X"
 
 if player == "O":
     player_turn = False
 
 ''' Make Player Able to Pick Selection'''
 
-while not player_has_won:
+while not game_is_over:
     game.display()
 
     while player_has_updated_board == False:
@@ -39,6 +41,11 @@ while not player_has_won:
             player_has_updated_board = game.update_square(player, selection)
             if player_has_updated_board == False:
                 print("\nThat is an invalid selection\n")
+            if player_count == "2":
+                if player == "X":
+                    player = "O"
+                else:
+                    player = "X"
             else:
                 player_turn = False
         else:
@@ -52,9 +59,13 @@ while not player_has_won:
             player_has_updated_board = True
             player_turn = True
 
-    player_has_won = game.is_winner(player)
+    game_is_over = game.is_winner(player)
     player_has_updated_board = False
 
-    if player_has_won:
+    if game_is_over:
         print("Player " + player + " has won")
         game.display()
+    elif len(game.list_of_valid_moves()) == 0:
+        print("The game is a tie")
+        game.display()
+        game_is_over = True
