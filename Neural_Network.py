@@ -35,7 +35,7 @@ class Network(nn.Module):
         """
         return self.net(x)
 
-    def act(self, obs, env, device):
+    def act(self, obs, env, device=torch.device("cpu")):
         """
 
         :param obs:
