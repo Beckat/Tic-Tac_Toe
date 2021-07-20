@@ -147,8 +147,8 @@ class GameEngine(gym.Env):
                 finish_state = "Tie"
                 #self.game_board.print_grid()
         else:
-            random_num = rand.randint(0, 3)
-            if action_second_entity == -1:
+            random_num = rand.randint(0, 9)
+            if random_num == 0:
                 if self.game_board.check_valid_input(ai_decorator, 5) and random_num == 0:
                     self.update_square(ai_decorator, 5)
                 else:
