@@ -142,7 +142,7 @@ class GameEngine(gym.Env):
         elif len(self.list_of_valid_moves()) == 0:
             done = True
             if reward[0] == 0:
-                reward[0] = .25
+                reward[0] = -.01
                 reward[1] = .25
                 finish_state = "Tie"
                 #self.game_board.print_grid()
