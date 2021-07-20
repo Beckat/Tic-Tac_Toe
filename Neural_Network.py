@@ -49,7 +49,7 @@ class Network(nn.Module):
 
         for x in range(1, 10):
             if x not in possible_values:
-                q_values[0][x - 1] = -10.0
+                q_values[0][x - 1] = -1000.0
 
         max_q_index = torch.argmax(q_values, dim=1)[0]
         action = max_q_index.detach().item()

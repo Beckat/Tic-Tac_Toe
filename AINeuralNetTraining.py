@@ -52,14 +52,14 @@ opp_rew_buffer = deque([0.0], maxlen=100)
 episode_reward = 0.0
 opp_episode_reward = 0.0
 
-online_net = Neural_Network.Network(env, 9, 135)
+online_net = Neural_Network.Network(env, 9, 400)
 
-target_net = Neural_Network.Network(env, 9, 135)
+target_net = Neural_Network.Network(env, 9, 400)
 online_net.to(device)
 target_net.to(device)
 
-opp_online_net = Neural_Network.Network(env, 9, 135)
-opp_target_net = Neural_Network.Network(env, 9, 135)
+opp_online_net = Neural_Network.Network(env, 9, 400)
+opp_target_net = Neural_Network.Network(env, 9, 400)
 opp_online_net.to(device)
 opp_target_net.to(device)
 
@@ -276,10 +276,10 @@ for step in itertools.count():
         ties = 0
         print(env.game_board.print_grid())
         if step < 2000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_50_v3")
-            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_initial_tic_tac_toe_50_v3")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_initial_tic_tac_toe_50_v4")
+            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_initial_tic_tac_toe_50_v4")
         if step > 10000:
-            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_50_v3")
-            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_tic_tac_toe_50_v3")
-            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_target_tic_tac_toe_50_v3")
-            torch.save(opp_target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_target_tic_tac_toe_50_v3")
+            torch.save(online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_tic_tac_toe_50_v4")
+            torch.save(target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_tic_tac_toe_50_v4")
+            torch.save(opp_online_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/nn_target_tic_tac_toe_50_v4")
+            torch.save(opp_target_net.state_dict(), "/home/danthom1704/PycharmProjects/Tic-Tac_toe/opp_nn_target_tic_tac_toe_50_v4")
