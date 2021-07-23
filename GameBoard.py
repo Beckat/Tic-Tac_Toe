@@ -1,28 +1,24 @@
 import numpy as np
-import gym
 
 
 class TicTacToe:
     """
-
+    Initializes the game board
     """
     def __init__(self, num_players = 1):
         self.tic_tac_toe_grid = [ ['.']*3 for i in range(3)]
         self.tic_tac_toe_grid = np.asarray(self.tic_tac_toe_grid)
-        self.turn = "x_turn"
-        self.num_players_tic_tac_toe = num_players
-
 
     def reset_board(self):
         """
-
+        Sets all squares back to default "blanks" '.'
         """
         self.tic_tac_toe_grid = [ ['.']*3 for i in range(3)]
         self.tic_tac_toe_grid = np.asarray(self.tic_tac_toe_grid)
 
     def print_grid(self):
         """
-
+        Prints each square as a tic-tac-toe grid
         """
         for y in range(3):
             for x in range(3):
@@ -31,15 +27,11 @@ class TicTacToe:
                     print("")
 
     def get_grid(self):
-        """
-
-        :return:
-        """
         return self.tic_tac_toe_grid
 
     def set_grid_square(self, value, grid_coordinate):
         """
-
+        Updates the square 1-9 with the X or O
         :param value:
         :param grid_coordinate:
         """
@@ -47,7 +39,7 @@ class TicTacToe:
 
     def check_valid_input(self, value, grid_coordinate):
         """
-
+        Checks if the square selected 1-9 is an empty square and in the valid range
         :param value:
         :param grid_coordinate:
         :return:
@@ -65,7 +57,8 @@ class TicTacToe:
 
     def get_x_coordinate(self, grid_coordinate):
         """
-
+        Takes a square selection 1-9 and finds what the x row is matching that
+        1 is row 0, 4 would be row 1
         :param grid_coordinate:
         :return:
         """
@@ -73,7 +66,8 @@ class TicTacToe:
 
     def get_y_coordinate(self, grid_coordinate):
         """
-
+        Takes a square selection 1-9 and finds what the y column is matching that
+        1 is column 0, 3 would be column 2
         :param grid_coordinate:
         :return:
         """
@@ -81,7 +75,7 @@ class TicTacToe:
 
     def get_valid_squares(self):
         """
-
+        Returns the empty values [1-9] squares in a list
         :return:
         """
         valid_squares = []
@@ -91,8 +85,5 @@ class TicTacToe:
         return valid_squares
 
     def get_1d_array_of_board(self):
-        """
 
-        :return:
-        """
         return self.tic_tac_toe_grid.flatten()

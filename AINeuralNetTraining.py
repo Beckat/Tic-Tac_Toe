@@ -52,6 +52,8 @@ opp_rew_buffer = deque([0.0], maxlen=100)
 episode_reward = 0.0
 opp_episode_reward = 0.0
 
+# build base X network and opp O network
+
 online_net = Neural_Network.Network(env, 16, 504)
 
 target_net = Neural_Network.Network(env, 16, 504)
@@ -65,7 +67,7 @@ opp_target_net.to(device)
 
 target_net.load_state_dict(online_net.state_dict())
 
-
+# Set learning rates, O has shown needing to adapt faster to X
 optimizer = torch.optim.Adam(online_net.parameters(), lr=5e-4,)
 opp_optimizer = torch.optim.Adam(opp_online_net.parameters(), lr=5e-3,)
 
@@ -89,12 +91,15 @@ for __ in range(MIN_REPLAY_SIZE):
         transition_holder = []
         obs = env.reset()
 
+# because the buffer is filled in after game ends the loop can end before filling the buffer
+# in that case we add what it currently has to fill out
 if len(replay_buffer) < MIN_REPLAY_SIZE:
     update_replay_buffer(transition_holder, replay_buffer)
     transition_holder = []
 
 opp_obs = env.reset()
 
+# Fills the replay buffer with O's values
 for __ in range(MIN_REPLAY_SIZE):
     action = env.action_space.sample()
     env.update_square("X", action+1)
