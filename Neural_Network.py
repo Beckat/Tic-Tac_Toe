@@ -4,7 +4,9 @@ import torch
 
 class Network(nn.Module):
     """
-
+    Builds out a one or two hidden layer network
+    Has a size 27 input row to represent 0 for each row in not blank "." and 1 for each blank square
+    The same for X and O squares
     """
     def __init__(self, env, hidden_size=243, hidden_size_2=0):
         super().__init__()
@@ -37,7 +39,8 @@ class Network(nn.Module):
 
     def act(self, obs, env, device=torch.device("cpu")):
         """
-
+        Finds the action with the highest expected Q value
+        If the action would be invalid set the Q value to -1000
         :param obs:
         :param env:
         :param device:
